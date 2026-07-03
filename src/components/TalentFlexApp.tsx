@@ -12,6 +12,7 @@ import {
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { ToastProvider } from "@/components/ToastProvider";
+import { InstallGuideModal } from "@/components/InstallGuideModal";
 import type { Member, TabId, Transaction } from "@/types";
 import { MembersTab } from "./MembersTab";
 import { PayTab } from "./PayTab";
@@ -197,6 +198,7 @@ export function TalentFlexApp() {
 
   return (
     <ToastProvider>
+      <InstallGuideModal />
       <div className="mx-auto flex min-h-full w-full max-w-lg flex-col">
         <header className="bg-navy px-4 py-5 text-paper sm:px-6">
           <h1 className="font-serif text-2xl font-bold tracking-tight">

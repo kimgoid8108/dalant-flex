@@ -23,12 +23,19 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "달란트플렉스",
   description: "교회 청년부 달란트 적립 확인 · 2026. 10. 4 바자회",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "달란트플렉스",
+  },
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
+  themeColor: "#1E2A44",
 };
 
 export default function RootLayout({
