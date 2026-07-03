@@ -70,14 +70,23 @@ export function InstallGuideModal() {
         <ol className="mt-4 space-y-2 text-sm text-navy/80">
           {platform === "ios" ? (
             <>
+              <li className="font-medium text-stamp/90">
+                꼭 &quot;사파리(Safari)&quot; 앱으로 열어주세요. 카카오톡이나
+                크롬으로 열면 이 메뉴가 안 보여요.
+              </li>
               <li>1. 하단 공유 버튼(네모 + 위쪽 화살표)을 탭하세요</li>
-              <li>2. 아래로 스크롤해서 &quot;홈 화면에 추가&quot;를 선택하세요</li>
+              <li>
+                2. 아래로 스크롤해서 &quot;홈 화면에 추가&quot;를 선택하세요
+              </li>
               <li>3. 오른쪽 위 &quot;추가&quot;를 탭하면 끝!</li>
             </>
           ) : (
             <>
               <li>1. 오른쪽 위 점 3개(⋮) 메뉴를 탭하세요</li>
-              <li>2. &quot;홈 화면에 추가&quot; 또는 &quot;앱 설치&quot;를 선택하세요</li>
+              <li>
+                2. &quot;홈 화면에 추가&quot; 또는 &quot;앱 설치&quot;를
+                선택하세요
+              </li>
               <li>3. &quot;설치&quot;를 탭하면 끝!</li>
             </>
           )}
