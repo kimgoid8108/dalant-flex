@@ -21,8 +21,29 @@ const messaging = firebase.messaging();
 messaging.onBackgroundMessage((payload) => {
   const title = payload.notification?.title || "달란트플렉스";
   const body = payload.notification?.body || "";
+  const link =
+    payload.fcmOptions?.link || payload.data?.link || "/staff/bible-qr";
+
   self.registration.showNotification(title, {
     body,
     icon: "/icon-192.png",
+    data: { link },
   });
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const link = event.notification.data?.link || "/staff/bible-qr";
+
+  event.waitUntil(
+    clients
+      .matchAll({ type: "window", includeUncontrolled: true })
+      .then((clientList) => {
+        const existing = clientList.find(
+          (c) => c.url.includes(link) && "focus" in c,
+        );
+        if (existing) return existing.focus();
+        return clients.openWindow(link);
+      }),
+  );
 });
