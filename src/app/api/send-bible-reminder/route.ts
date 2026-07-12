@@ -3,11 +3,39 @@ import { adminDb, adminMessaging } from "@/lib/firebaseAdmin";
 
 export const dynamic = "force-dynamic";
 
-function toDateKey(d: Date): string {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
+const WEEKDAY_NAMES = [
+  "Sunday",
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+];
+
+/** 서버가 어느 타임존에서 돌아가든 정확한 KST(한국 시간) 값을 뽑아낸다 */
+function getKstNow() {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Seoul",
+    weekday: "long",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "numeric",
+    minute: "numeric",
+    hour12: false,
+  }).formatToParts(new Date());
+
+  const map: Record<string, string> = {};
+  for (const p of parts) map[p.type] = p.value;
+
+  const dayOfWeek = WEEKDAY_NAMES.indexOf(map.weekday);
+  let hour = parseInt(map.hour, 10);
+  if (hour === 24) hour = 0;
+  const minute = parseInt(map.minute, 10);
+  const dateKey = `${map.year}-${map.month}-${map.day}`;
+
+  return { dayOfWeek, hour, minute, dateKey };
 }
 
 export async function POST(req: NextRequest) {
@@ -36,22 +64,21 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ skipped: "disabled" });
   }
 
-  // KST(한국 시간) 기준으로 현재 시각 계산
-  const now = new Date(
-    new Date().toLocaleString("en-US", { timeZone: "Asia/Seoul" }),
-  );
+  const kst = getKstNow();
 
   const matchesSchedule =
-    now.getDay() === settings.dayOfWeek &&
-    now.getHours() === settings.hour &&
-    now.getMinutes() === settings.minute;
+    kst.dayOfWeek === settings.dayOfWeek &&
+    kst.hour === settings.hour &&
+    kst.minute === settings.minute;
 
   if (!matchesSchedule) {
-    return NextResponse.json({ skipped: "not scheduled time" });
+    return NextResponse.json({
+      skipped: "not scheduled time",
+      debug: { now: kst, expected: settings },
+    });
   }
 
-  const todayKey = toDateKey(now);
-  if (settings.lastSentDate === todayKey) {
+  if (settings.lastSentDate === kst.dateKey) {
     return NextResponse.json({ skipped: "already sent today" });
   }
 
@@ -62,7 +89,7 @@ export async function POST(req: NextRequest) {
     .filter(Boolean);
 
   if (tokens.length === 0) {
-    await settingsRef.set({ lastSentDate: todayKey }, { merge: true });
+    await settingsRef.set({ lastSentDate: kst.dateKey }, { merge: true });
     return NextResponse.json({ sent: 0, note: "no tokens registered" });
   }
 
@@ -79,7 +106,7 @@ export async function POST(req: NextRequest) {
     },
   });
 
-  await settingsRef.set({ lastSentDate: todayKey }, { merge: true });
+  await settingsRef.set({ lastSentDate: kst.dateKey }, { merge: true });
 
   return NextResponse.json({
     sent: response.successCount,
