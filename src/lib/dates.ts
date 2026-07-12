@@ -41,3 +41,13 @@ export function formatDateTime(timestamp: number): string {
 export function isSameDay(timestamp: number, date: Date = new Date()): boolean {
   return toDateKey(new Date(timestamp)) === toDateKey(date);
 }
+
+/** 일요일 오후 3시 30분 ~ 4시 30분 사이만 true (성경책 지참 셀프 체크인 시간창) */
+export function isBibleCheckInWindowOpen(now: Date = new Date()): boolean {
+  if (now.getDay() !== 0) return false; // 0 = 일요일
+  const start = new Date(now);
+  start.setHours(15, 30, 0, 0);
+  const end = new Date(now);
+  end.setHours(16, 30, 0, 0);
+  return now >= start && now <= end;
+}

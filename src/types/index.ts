@@ -21,4 +21,13 @@ export type Category = {
   eventOnly?: boolean;
 };
 
-export type TabId = "pay" | "members" | "transactions";
+export type TabId = "pay" | "members" | "transactions" | "reminder";
+
+export type BibleReminderSettings = {
+  enabled: boolean;
+  dayOfWeek: number; // 0 = 일요일 ~ 6 = 토요일
+  hour: number; // 0~23
+  minute: number; // 0~59
+  message: string;
+  lastSentDate?: string; // YYYY-MM-DD, 중복 발송 방지용
+};

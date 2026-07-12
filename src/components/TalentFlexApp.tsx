@@ -13,6 +13,7 @@ import {
 import { db } from "@/lib/firebase";
 import { ToastProvider } from "@/components/ToastProvider";
 import { InstallGuideModal } from "@/components/InstallGuideModal";
+import { ReminderSettingsTab } from "@/components/ReminderSettingsTab";
 import type { Member, TabId, Transaction } from "@/types";
 import { MembersTab } from "./MembersTab";
 import { PayTab } from "./PayTab";
@@ -227,6 +228,7 @@ export function TalentFlexApp() {
           {activeTab === "transactions" && (
             <TransactionsTab members={members} transactions={transactions} />
           )}
+          {activeTab === "reminder" && <ReminderSettingsTab />}
         </main>
       </div>
     </ToastProvider>

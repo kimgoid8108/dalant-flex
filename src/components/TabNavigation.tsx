@@ -6,6 +6,7 @@ const TABS: { id: TabId; label: string }[] = [
   { id: "pay", label: "지급하기" },
   { id: "members", label: "명단" },
   { id: "transactions", label: "거래내역" },
+  { id: "reminder", label: "알림설정" },
 ];
 
 type Props = {
