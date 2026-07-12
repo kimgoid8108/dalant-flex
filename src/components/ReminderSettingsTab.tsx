@@ -41,6 +41,14 @@ export function ReminderSettingsTab() {
         setLoading(false);
       }
     })();
+
+    if (typeof window !== "undefined" && "Notification" in window) {
+      if (Notification.permission === "granted") {
+        setPushStatus("granted");
+      } else if (Notification.permission === "denied") {
+        setPushStatus("denied");
+      }
+    }
   }, []);
 
   const handleTimeChange = (value: string) => {
