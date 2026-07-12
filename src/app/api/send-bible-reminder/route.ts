@@ -44,6 +44,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
+  const isTestMode = req.nextUrl.searchParams.get("test") === "true";
+
   const settingsRef = adminDb.collection("settings").doc("bibleReminder");
   const snap = await settingsRef.get();
 
@@ -60,26 +62,28 @@ export async function POST(req: NextRequest) {
     lastSentDate?: string;
   };
 
-  if (!settings.enabled) {
+  if (!settings.enabled && !isTestMode) {
     return NextResponse.json({ skipped: "disabled" });
   }
 
   const kst = getKstNow();
 
-  const matchesSchedule =
-    kst.dayOfWeek === settings.dayOfWeek &&
-    kst.hour === settings.hour &&
-    kst.minute === settings.minute;
+  if (!isTestMode) {
+    const matchesSchedule =
+      kst.dayOfWeek === settings.dayOfWeek &&
+      kst.hour === settings.hour &&
+      kst.minute === settings.minute;
 
-  if (!matchesSchedule) {
-    return NextResponse.json({
-      skipped: "not scheduled time",
-      debug: { now: kst, expected: settings },
-    });
-  }
+    if (!matchesSchedule) {
+      return NextResponse.json({
+        skipped: "not scheduled time",
+        debug: { now: kst, expected: settings },
+      });
+    }
 
-  if (settings.lastSentDate === kst.dateKey) {
-    return NextResponse.json({ skipped: "already sent today" });
+    if (settings.lastSentDate === kst.dateKey) {
+      return NextResponse.json({ skipped: "already sent today" });
+    }
   }
 
   // 저장된 모든 푸시 토큰 가져오기
@@ -89,7 +93,9 @@ export async function POST(req: NextRequest) {
     .filter(Boolean);
 
   if (tokens.length === 0) {
-    await settingsRef.set({ lastSentDate: kst.dateKey }, { merge: true });
+    if (!isTestMode) {
+      await settingsRef.set({ lastSentDate: kst.dateKey }, { merge: true });
+    }
     return NextResponse.json({ sent: 0, note: "no tokens registered" });
   }
 
@@ -106,10 +112,13 @@ export async function POST(req: NextRequest) {
     },
   });
 
-  await settingsRef.set({ lastSentDate: kst.dateKey }, { merge: true });
+  if (!isTestMode) {
+    await settingsRef.set({ lastSentDate: kst.dateKey }, { merge: true });
+  }
 
   return NextResponse.json({
     sent: response.successCount,
     failed: response.failureCount,
+    testMode: isTestMode,
   });
 }
